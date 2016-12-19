@@ -1,51 +1,28 @@
-import Ember from 'ember';
-import { module, test } from 'qunit';
-import startApp from 'croodle/tests/helpers/start-app';
-import Pretender from 'pretender';
-import serverGetPolls from '../helpers/server-get-polls';
+import { test } from 'qunit';
+import moduleForAcceptance from 'croodle/tests/helpers/module-for-acceptance';
 import moment from 'moment';
 /* jshint proto: true */
 
-const { run } = Ember;
+let dateString = moment.localeData()
+  .longDateFormat('LLLL')
+  .replace(
+    moment.localeData().longDateFormat('LT'), '')
+  .trim();
 
-let application, server;
-let dateString;
-
-module('Acceptance | view evaluation', {
+moduleForAcceptance('Acceptance | view evaluation', {
   beforeEach() {
     window.localStorage.setItem('locale', 'en');
-
-    application = startApp();
-    application.__container__.lookup('adapter:application').__proto__.namespace = '';
-
-    server = new Pretender();
-    dateString = moment.localeData()
-      .longDateFormat('LLLL')
-      .replace(
-        moment.localeData().longDateFormat('LT'), '')
-      .trim();
-  },
-  afterEach() {
-    server.shutdown();
-
-    run(application, 'destroy');
+    moment.locale('en');
   }
 });
 
 test('evaluation summary is not present for poll without participants', function(assert) {
-  let id = 'test';
   let encryptionKey = 'abcdefghijklmnopqrstuvwxyz0123456789';
-
-  server.get(`/polls/${id}`, function() {
-    return serverGetPolls(
-      {
-        id,
-        users: []
-      }, encryptionKey
-    );
+  let poll = server.create('poll', {
+    encryptionKey
   });
 
-  visit(`/poll/${id}?encryptionKey=${encryptionKey}`);
+  visit(`/poll/${poll.id}?encryptionKey=${encryptionKey}`);
 
   andThen(function() {
     assert.equal(currentPath(), 'poll.participation');
@@ -58,76 +35,69 @@ test('evaluation summary is not present for poll without participants', function
 });
 
 test('evaluation is correct for FindADate', function(assert) {
-  let id = 'test';
   let encryptionKey = 'abcdefghijklmnopqrstuvwxyz0123456789';
-
-  server.get(`/polls/${id}`, function() {
-    return serverGetPolls(
+  let user1 = server.create('user', {
+    creationDate: '2015-01-01T00:00:00.000Z',
+    encryptionKey,
+    name: 'Maximilian',
+    selections: [
       {
-        id,
-        answers: [
-          {
-            type: 'yes',
-            labelTranslation: 'answerTypes.yes.label',
-            icon: 'glyphicon glyphicon-thumbs-up',
-            label: 'Yes'
-          },
-          {
-            type: 'no',
-            labelTranslation: 'answerTypes.no.label',
-            icon: 'glyphicon glyphicon-thumbs-down',
-            label: 'No'
-          }
-        ],
-        options: [
-          { title: '2015-12-12' },
-          { title: '2016-01-01' }
-        ],
-        users: [
-          {
-            id: `${id}_0`,
-            name: 'Maximilian',
-            selections: [
-              {
-                type: 'yes',
-                labelTranslation: 'answerTypes.yes.label',
-                icon: 'glyphicon glyphicon-thumbs-up',
-                label: 'Yes'
-              },
-              {
-                type: 'yes',
-                labelTranslation: 'answerTypes.yes.label',
-                icon: 'glyphicon glyphicon-thumbs-up',
-                label: 'Yes'
-              }
-            ],
-            creationDate: '2015-01-01T00:00:00.000Z'
-          },
-          {
-            id: `${id}_1`,
-            name: 'Peter',
-            selections: [
-              {
-                type: 'no',
-                labelTranslation: 'answerTypes.no.label',
-                icon: 'glyphicon glyphicon-thumbs-down',
-                label: 'No'
-              },
-              {
-                type: 'yes',
-                labelTranslation: 'answerTypes.yes.label',
-                icon: 'glyphicon glyphicon-thumbs-up',
-                label: 'Yes'
-              }
-            ],
-            creationDate: '2015-08-01T00:00:00.000Z'
-          }
-        ]
-      }, encryptionKey
-    );
+        type: 'yes',
+        labelTranslation: 'answerTypes.yes.label',
+        icon: 'glyphicon glyphicon-thumbs-up',
+        label: 'Yes'
+      },
+      {
+        type: 'yes',
+        labelTranslation: 'answerTypes.yes.label',
+        icon: 'glyphicon glyphicon-thumbs-up',
+        label: 'Yes'
+      }
+    ]
+  });
+  let user2 = server.create('user', {
+    creationDate: '2015-08-01T00:00:00.000Z',
+    encryptionKey,
+    name: 'Peter',
+    selections: [
+      {
+        type: 'no',
+        labelTranslation: 'answerTypes.no.label',
+        icon: 'glyphicon glyphicon-thumbs-down',
+        label: 'No'
+      },
+      {
+        type: 'yes',
+        labelTranslation: 'answerTypes.yes.label',
+        icon: 'glyphicon glyphicon-thumbs-up',
+        label: 'Yes'
+      }
+    ]
+  });
+  let poll = server.create('poll', {
+    answers: [
+      {
+        type: 'yes',
+        labelTranslation: 'answerTypes.yes.label',
+        icon: 'glyphicon glyphicon-thumbs-up',
+        label: 'Yes'
+      },
+      {
+        type: 'no',
+        labelTranslation: 'answerTypes.no.label',
+        icon: 'glyphicon glyphicon-thumbs-down',
+        label: 'No'
+      }
+    ],
+    encryptionKey,
+    options: [
+      { title: '2015-12-12' },
+      { title: '2016-01-01' }
+    ],
+    users: [user1, user2]
   });
 
-  visit(`/poll/${id}/evaluation?encryptionKey=${encryptionKey}`);
+  visit(`/poll/${poll.id}/evaluation?encryptionKey=${encryptionKey}`);
 
   andThen(function() {
     assert.equal(currentPath(), 'poll.evaluation');
@@ -153,77 +123,70 @@ test('evaluation is correct for FindADate', function(assert) {
 });
 
 test('evaluation is correct for MakeAPoll', function(assert) {
-  let id = 'test';
   let encryptionKey = 'abcdefghijklmnopqrstuvwxyz0123456789';
-
-  server.get(`/polls/${id}`, function() {
-    return serverGetPolls(
+  let user1 = server.create('user', {
+    creationDate: '2015-01-01T00:00:00.000Z',
+    encryptionKey,
+    name: 'Maximilian',
+    selections: [
       {
-        id,
-        answers: [
-          {
-            type: 'yes',
-            labelTranslation: 'answerTypes.yes.label',
-            icon: 'glyphicon glyphicon-thumbs-up',
-            label: 'Yes'
-          },
-          {
-            type: 'no',
-            labelTranslation: 'answerTypes.no.label',
-            icon: 'glyphicon glyphicon-thumbs-down',
-            label: 'No'
-          }
-        ],
-        options: [
-          { title: 'first option' },
-          { title: 'second option' }
-        ],
-        pollType: 'MakeAPoll',
-        users: [
-          {
-            id: `${id}_0`,
-            name: 'Maximilian',
-            selections: [
-              {
-                type: 'yes',
-                labelTranslation: 'answerTypes.yes.label',
-                icon: 'glyphicon glyphicon-thumbs-up',
-                label: 'Yes'
-              },
-              {
-                type: 'yes',
-                labelTranslation: 'answerTypes.yes.label',
-                icon: 'glyphicon glyphicon-thumbs-up',
-                label: 'Yes'
-              }
-            ],
-            creationDate: '2015-01-01T00:00:00.000Z'
-          },
-          {
-            id: `${id}_1`,
-            name: 'Peter',
-            selections: [
-              {
-                type: 'no',
-                labelTranslation: 'answerTypes.no.label',
-                icon: 'glyphicon glyphicon-thumbs-down',
-                label: 'No'
-              },
-              {
-                type: 'yes',
-                labelTranslation: 'answerTypes.yes.label',
-                icon: 'glyphicon glyphicon-thumbs-up',
-                label: 'Yes'
-              }
-            ],
-            creationDate: '2015-08-01T00:00:00.000Z'
-          }
-        ]
-      }, encryptionKey
-    );
+        type: 'yes',
+        labelTranslation: 'answerTypes.yes.label',
+        icon: 'glyphicon glyphicon-thumbs-up',
+        label: 'Yes'
+      },
+      {
+        type: 'yes',
+        labelTranslation: 'answerTypes.yes.label',
+        icon: 'glyphicon glyphicon-thumbs-up',
+        label: 'Yes'
+      }
+    ]
+  });
+  let user2 = server.create('user', {
+    creationDate: '2015-08-01T00:00:00.000Z',
+    encryptionKey,
+    name: 'Peter',
+    selections: [
+      {
+        type: 'no',
+        labelTranslation: 'answerTypes.no.label',
+        icon: 'glyphicon glyphicon-thumbs-down',
+        label: 'No'
+      },
+      {
+        type: 'yes',
+        labelTranslation: 'answerTypes.yes.label',
+        icon: 'glyphicon glyphicon-thumbs-up',
+        label: 'Yes'
+      }
+    ]
+  });
+  let poll = server.create('poll', {
+    answers: [
+      {
+        type: 'yes',
+        labelTranslation: 'answerTypes.yes.label',
+        icon: 'glyphicon glyphicon-thumbs-up',
+        label: 'Yes'
+      },
+      {
+        type: 'no',
+        labelTranslation: 'answerTypes.no.label',
+        icon: 'glyphicon glyphicon-thumbs-down',
+        label: 'No'
+      }
+    ],
+    encryptionKey,
+    options: [
+      { title: 'first option' },
+      { title: 'second option' }
+    ],
+    pollType: 'MakeAPoll',
+    users: [user1, user2]
   });
 
-  visit(`/poll/${id}/evaluation?encryptionKey=${encryptionKey}`);
+  visit(`/poll/${poll.id}/evaluation?encryptionKey=${encryptionKey}`);
 
   andThen(function() {
     assert.equal(currentPath(), 'poll.evaluation');
@@ -268,14 +231,33 @@ test('evaluation is correct for MakeAPoll', function(assert) {
 });
 
 test('could open evaluation by tab from poll participation', function(assert) {
-  let id = 'test';
   let encryptionKey = 'abcdefghijklmnopqrstuvwxyz0123456789';
-
-  server.get(`/polls/${id}`, function() {
-    return serverGetPolls(
+  let poll = server.create('poll', {
+    answers: [
       {
-        id,
-        answers: [
+        type: 'yes',
+        labelTranslation: 'answerTypes.yes.label',
+        icon: 'glyphicon glyphicon-thumbs-up',
+        label: 'Yes'
+      },
+      {
+        type: 'no',
+        labelTranslation: 'answerTypes.no.label',
+        icon: 'glyphicon glyphicon-thumbs-down',
+        label: 'No'
+      }
+    ],
+    encryptionKey,
+    options: [
+      { title: '2015-12-12' },
+      { title: '2016-01-01' }
+    ],
+    users: [
+      server.create('user', {
+        creationDate: '2015-01-01T00:00:00.000Z',
+        encryptionKey,
+        name: 'Maximilian',
+        selections: [
           {
             type: 'yes',
             labelTranslation: 'answerTypes.yes.label',
@@ -283,61 +265,36 @@ test('could open evaluation by tab from poll participation', function(assert) {
             label: 'Yes'
           },
           {
-            type: 'no',
-            labelTranslation: 'answerTypes.no.label',
-            icon: 'glyphicon glyphicon-thumbs-down',
-            label: 'No'
-          }
-        ],
-        options: [
-          { title: '2015-12-12' },
-          { title: '2016-01-01' }
-        ],
-        users: [
-          {
-            id: `${id}_0`,
-            name: 'Maximilian',
-            selections: [
-              {
-                type: 'yes',
-                labelTranslation: 'answerTypes.yes.label',
-                icon: 'glyphicon glyphicon-thumbs-up',
-                label: 'Yes'
-              },
-              {
-                type: 'yes',
-                labelTranslation: 'answerTypes.yes.label',
-                icon: 'glyphicon glyphicon-thumbs-up',
-                label: 'Yes'
-              }
-            ],
-            creationDate: '2015-01-01T00:00:00.000Z'
-          },
-          {
-            id: `${id}_1`,
-            name: 'Peter',
-            selections: [
-              {
-                type: 'yes',
-                labelTranslation: 'answerTypes.yes.label',
-                icon: 'glyphicon glyphicon-thumbs-up',
-                label: 'Yes'
-              },
-              {
-                id: 'no',
-                labelTranslation: 'answerTypes.yes.label',
-                icon: 'glyphicon glyphicon-thumbs-up',
-                label: 'Yes'
-              }
-            ],
-            creationDate: '2015-08-01T00:00:00.000Z'
+            type: 'yes',
+            labelTranslation: 'answerTypes.yes.label',
+            icon: 'glyphicon glyphicon-thumbs-up',
+            label: 'Yes'
           }
         ]
-      }, encryptionKey
-    );
+      }),
+      server.create('user', {
+        creationDate: '2015-08-01T00:00:00.000Z',
+        encryptionKey,
+        name: 'Peter',
+        selections: [
+          {
+            type: 'yes',
+            labelTranslation: 'answerTypes.yes.label',
+            icon: 'glyphicon glyphicon-thumbs-up',
+            label: 'Yes'
+          },
+          {
+            id: 'no',
+            labelTranslation: 'answerTypes.yes.label',
+            icon: 'glyphicon glyphicon-thumbs-up',
+            label: 'Yes'
+          }
+        ]
+      })
+    ]
   });
 
-  visit(`/poll/${id}?encryptionKey=${encryptionKey}`);
+  visit(`/poll/${poll.id}?encryptionKey=${encryptionKey}`);
 
   andThen(function() {
     assert.equal(currentPath(), 'poll.participation');

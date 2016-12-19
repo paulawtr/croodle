@@ -10,7 +10,6 @@
     "jstimezonedetect": "~1.0.5",
     "ember-cli-moment-shim": "~0.2.0",
     "moment-timezone": ">= 0.1.0",
-    "pretender": "^0.6.0",
     "moment": ">= 2.8.0",
     "ceibo": "1.1.0"
   }

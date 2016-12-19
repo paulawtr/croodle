@@ -33,7 +33,8 @@
     "t",
     "backButton",
     "forwardButton",
-    "setupBrowserNavigationButtons"
+    "setupBrowserNavigationButtons",
+    "server"
   ],
   "node": false,
   "browser": false,

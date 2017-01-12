@@ -2,9 +2,8 @@ import { module, test } from 'qunit';
 import { startMirage } from 'croodle/initializers/ember-cli-mirage';
 import sjcl from 'sjcl';
 import Ember from 'ember';
-import $ from 'jquery';
 
-const { get, run } = Ember;
+const { get } = Ember;
 
 module('Integration | Mirage api mocking', {
   beforeEach() {

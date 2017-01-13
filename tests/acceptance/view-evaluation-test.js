@@ -3,12 +3,6 @@ import moduleForAcceptance from 'croodle/tests/helpers/module-for-acceptance';
 import moment from 'moment';
 /* jshint proto: true */
 
-let dateString = moment.localeData()
-  .longDateFormat('LLLL')
-  .replace(
-    moment.localeData().longDateFormat('LT'), '')
-  .trim();
-
 moduleForAcceptance('Acceptance | view evaluation', {
   beforeEach() {
     window.localStorage.setItem('locale', 'en');
@@ -109,7 +103,7 @@ test('evaluation is correct for FindADate', function(assert) {
     );
     assert.equal(
       find('.best-options strong').text().trim(),
-      moment('2016-01-01').format(dateString),
+      'Friday, January 1, 2016',
       'options are evaluated correctly'
     );
     assert.equal(

@@ -1,12 +1,10 @@
 import { test } from 'qunit';
 import moduleForAcceptance from 'croodle/tests/helpers/module-for-acceptance';
-import moment from 'moment';
 /* jshint proto: true */
 
 moduleForAcceptance('Acceptance | participate in a poll', {
   beforeEach() {
     window.localStorage.setItem('locale', 'en');
-    moment.locale('en');
   }
 });
 

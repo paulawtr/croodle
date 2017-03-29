@@ -1,5 +1,5 @@
 import { Factory } from 'ember-cli-mirage';
-import encrypt from './util-encrypt';
+import encrypt from '../utils/encrypt';
 
 export default Factory.extend({
   creationDate: (new Date()).toISOString(),

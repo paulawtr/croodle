@@ -1,12 +1,8 @@
 import { Factory } from 'ember-cli-mirage';
-import encrypt from './util-encrypt';
+import encrypt from '../utils/encrypt';
 
 export default Factory.extend({
-  encryptionKey: 'abcdefghijklmnopqrstuvwxyz',
-  title: 'default title',
-  description: 'default description',
-  pollType: 'FindADate',
-  answerType: 'YesNo',
+  anonymousUser: false,
   answers: [
     {
       type: 'yes',
@@ -21,6 +17,13 @@ export default Factory.extend({
       label: 'Nein'
     }
   ],
+  answerType: 'YesNo',
+  creationDate: '2015-04-01T11:11:11.111Z',
+  description: 'default description',
+  encryptionKey: 'abcdefghijklmnopqrstuvwxyz',
+  expirationDate: '',
+  forceAnswer: true,
+  isDateTime: false,
   options: [
     {
       title: '2017-12-24'
@@ -29,11 +32,8 @@ export default Factory.extend({
       title: '2018-01-01'
     }
   ],
-  creationDate: '2015-04-01T11:11:11.111Z',
-  forceAnswer: true,
-  anonymousUser: false,
-  isDateTime: false,
-  expirationDate: '',
+  pollType: 'FindADate',
+  title: 'default title',
   timezone: '',
   version: 'v0.3',
 

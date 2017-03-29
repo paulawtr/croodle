@@ -50,23 +50,15 @@ test('view a poll with dates', function(assert) {
   });
 
   visit(`/poll/${poll.id}?encryptionKey=${encryptionKey}`).then(function() {
-    const dayFormat = moment.localeData().longDateFormat('LLLL')
-                        .replace(
-                          moment.localeData().longDateFormat('LT'), '')
-                        .trim();
     assert.deepEqual(
       pageParticipation.options().labels,
-      [
-        moment('2015-12-12').format(dayFormat),
-        moment('2016-01-01').format(dayFormat)
-      ]
+      [ 'Saturday, December 12, 2015', 'Friday, January 1, 2016' ]
     );
   });
 });
 
 test('view a poll with dates and times', function(assert) {
   let encryptionKey = 'abcdefghijklmnopqrstuvwxyz0123456789';
-  let timezone = jstz.determine().name();
   let poll = server.create('poll', {
     encryptionKey,
     isDateTime: true,
@@ -75,7 +67,7 @@ test('view a poll with dates and times', function(assert) {
       { title: '2015-12-12T13:13:00.000Z' },
       { title: '2016-01-01T11:11:00.000Z' }
     ],
-    timezone
+    timezone: 'Europe/Lisbon'
   });
 
   visit(`/poll/${poll.id}?encryptionKey=${encryptionKey}`).then(function() {
@@ -83,11 +75,11 @@ test('view a poll with dates and times', function(assert) {
       pageParticipation.options().labels,
       [
         // full date
-        moment.tz('2015-12-12T11:11:00.000Z', timezone).format('LLLL'),
+        'Saturday, December 12, 2015 11:11 AM',
         // only time cause day is repeated
-        moment.tz('2015-12-12T13:13:00.000Z', timezone).format('LT'),
+        '1:13 PM',
         // full date cause day changed
-        moment.tz('2016-01-01T11:11:00.000Z', timezone).format('LLLL')
+        'Friday, January 1, 2016 11:11 AM'
       ]
     );
   });

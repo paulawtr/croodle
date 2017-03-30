@@ -46,7 +46,7 @@
     "ember-cli-inject-live-reload": "^1.4.1",
     "ember-cli-jshint": "^1.0.4",
     "ember-cli-less": "^1.5.3",
-    "ember-cli-mirage": "github:samselikoff/ember-cli-mirage#pull/977/head",
+    "ember-cli-mirage": "github:samselikoff/ember-cli-mirage#977/head",
     "ember-cli-moment-shim": "0.7.1",
     "ember-cli-page-object": "1.7.0",
     "ember-cli-qunit": "^2.1.0",
